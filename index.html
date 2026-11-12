@@ -3,35 +3,37 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Ingram Micro power map</title>
+<title>Ingram Micro Power Map | TADA</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🗺️</text></svg>">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
   color-scheme: light;
-  --bg:#EEF1F5; --surface:#FFFFFF; --surface-2:#F6F8FA; --ink:#17202B; --muted:#5E6B7A; --line:#CBD3DD; --line-soft:#E1E6EC;
-  --accent:#0D6B6B; --accent-soft:#D7ECEB; --danger:#A33A2E;
-  --f-exec:#2F3D63; --f-fin:#2F7D55; --f-proc:#7F4F99; --f-sc:#1E6FAE; --f-ops:#B97412; --f-log:#B0453A; --f-tech:#4D6B78; --f-sales:#7A7F87; --f-legal:#6F5C48;
-  --shadow:0 1px 2px rgba(23,32,43,.06),0 2px 8px rgba(23,32,43,.05);
-  --font:"Instrument Sans",ui-sans-serif,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+  /* TADA brand: Twilight Plum, Coral Red, Cyan Blue, Electric Cyan + shades */
+  --plum:#412148; --coral:#FF635D; --cyan:#1EAABC; --ecyan:#1DEFFF;
+  --bg:#EFF0EF; --surface:#FFFFFF; --surface-2:#F6F6F5; --ink:#1E1621; --muted:#484847; --line:#D1CFC9; --line-soft:#E4E2DE;
+  --accent:#412148; --accent-soft:#EEE8EF; --path:#1EAABC; --known:#FF635D; --danger:#C2413B;
+  --f-exec:#412148; --f-fin:#D9982A; --f-proc:#FF635D; --f-sc:#1EAABC; --f-ops:#005B65; --f-log:#1FB889; --f-tech:#7A647F; --f-sales:#787874; --f-legal:#484847;
+  --shadow:0 1px 2px rgba(65,33,72,.06),0 2px 8px rgba(65,33,72,.06);
+  --font:"Inter",Helvetica,Arial,ui-sans-serif,system-ui,sans-serif;
 }
 @media (prefers-color-scheme: dark){
   :root:not([data-theme="light"]){
     color-scheme: dark;
-    --bg:#11151B; --surface:#1A2029; --surface-2:#202733; --ink:#E5EAF0; --muted:#97A3B1; --line:#344050; --line-soft:#283140;
-    --accent:#4FC1BC; --accent-soft:#173634; --danger:#E17A6D;
-    --f-exec:#8DA0D6; --f-fin:#5DBE8A; --f-proc:#BC8FD6; --f-sc:#5AA7E4; --f-ops:#E1A54A; --f-log:#E07F72; --f-tech:#8DADBA; --f-sales:#A6ABB2; --f-legal:#BFA88E;
-    --shadow:0 1px 2px rgba(0,0,0,.3);
+    --bg:#120C15; --surface:#1D1422; --surface-2:#271C2D; --ink:#F2F1EF; --muted:#BDB6C0; --line:#3E3045; --line-soft:#2E2334;
+    --accent:#1DEFFF; --accent-soft:#16323A; --path:#1DEFFF; --known:#FF827D; --danger:#FF827D;
+    --f-exec:#B79CC0; --f-fin:#F2BE55; --f-proc:#FF827D; --f-sc:#1DEFFF; --f-ops:#22A9B6; --f-log:#24FFAB; --f-tech:#A993AE; --f-sales:#A3A39E; --f-legal:#CFCCC5;
+    --shadow:0 1px 2px rgba(0,0,0,.35);
   }
 }
 :root[data-theme="dark"]{
   color-scheme: dark;
-  --bg:#11151B; --surface:#1A2029; --surface-2:#202733; --ink:#E5EAF0; --muted:#97A3B1; --line:#344050; --line-soft:#283140;
-  --accent:#4FC1BC; --accent-soft:#173634; --danger:#E17A6D;
-  --f-exec:#8DA0D6; --f-fin:#5DBE8A; --f-proc:#BC8FD6; --f-sc:#5AA7E4; --f-ops:#E1A54A; --f-log:#E07F72; --f-tech:#8DADBA; --f-sales:#A6ABB2; --f-legal:#BFA88E;
-  --shadow:0 1px 2px rgba(0,0,0,.3);
+  --bg:#120C15; --surface:#1D1422; --surface-2:#271C2D; --ink:#F2F1EF; --muted:#BDB6C0; --line:#3E3045; --line-soft:#2E2334;
+  --accent:#1DEFFF; --accent-soft:#16323A; --path:#1DEFFF; --known:#FF827D; --danger:#FF827D;
+  --f-exec:#B79CC0; --f-fin:#F2BE55; --f-proc:#FF827D; --f-sc:#1DEFFF; --f-ops:#22A9B6; --f-log:#24FFAB; --f-tech:#A993AE; --f-sales:#A3A39E; --f-legal:#CFCCC5;
+  --shadow:0 1px 2px rgba(0,0,0,.35);
 }
 :root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
 *,*::before,*::after{box-sizing:inherit}
@@ -41,10 +43,18 @@ button,input,select,textarea{font:inherit;color:inherit}
 :focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
 /* Top bar */
-.bar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--surface);border-bottom:1px solid var(--line);flex-wrap:wrap}
+.bar{display:flex;align-items:center;gap:12px;padding:10px 16px;background:var(--plum);color:#fff;flex-wrap:wrap;position:relative}
+.bar::after{content:"";position:absolute;left:0;right:0;bottom:0;height:3px;background:linear-gradient(90deg,var(--plum),var(--cyan) 70%,var(--ecyan))}
+.bar .btn{background:transparent;border-color:rgba(255,255,255,.35);color:#fff}
+.bar .btn:hover{background:rgba(255,255,255,.1)}
+.bar .search input{background:rgba(255,255,255,.1);border-color:rgba(255,255,255,.3);color:#fff}
+.bar .search input::placeholder{color:rgba(255,255,255,.72)}
+.bar .search svg{color:rgba(255,255,255,.8)}
+.bar .results{color:var(--ink)}
+.bar .menu-list{color:var(--ink)}
 .title{display:flex;flex-direction:column;margin-right:8px;min-width:0}
-.title h1{font-size:17px;font-weight:700;margin:0;letter-spacing:-.01em}
-.title span{font-size:12px;color:var(--muted)}
+.title h1{font-size:17px;font-weight:600;margin:0;letter-spacing:-.01em}
+.title span{font-size:12px;color:rgba(255,255,255,.75)}
 .search{position:relative;flex:1 1 260px;max-width:420px}
 .search input{width:100%;padding:8px 12px 8px 34px;border:1px solid var(--line);border-radius:8px;background:var(--surface-2)}
 .search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:var(--muted)}
@@ -82,25 +92,29 @@ main{flex:1;display:flex;min-height:0;position:relative}
 #canvas.dragging{cursor:grabbing}
 svg#chart{width:100%;height:100%;display:block}
 .link{fill:none;stroke:var(--line);stroke-width:1.4}
-.link.path{stroke:var(--accent);stroke-width:2.4}
-.link.hover{stroke:var(--accent);stroke-width:2;opacity:.75}
+.link.path{stroke:var(--path);stroke-width:2.4}
+.link.hover{stroke:var(--path);stroke-width:2;opacity:.8}
 .node .card{transition:stroke .15s}
-.node.hover .card{stroke:var(--accent)}
+.node.hover .card{stroke:var(--path)}
 .node .lift{transition:transform .15s}
 .node.hover .lift{transform:translateY(-1px)}
 .node{cursor:pointer}
 .node .card{fill:var(--surface);stroke:var(--line);stroke-width:1}
 .node:hover .card{stroke:var(--muted)}
 .node.selected .card,.node.selected:hover .card{stroke:var(--accent);stroke-width:2;fill:var(--accent-soft)}
-.node.onpath .card{stroke:var(--accent)}
+.node.onpath .card{stroke:var(--path)}
 .node.dim{opacity:.22}
-.node .name{font-size:13px;font-weight:600;fill:var(--ink)}
-.node .role{font-size:11.5px;fill:var(--muted)}
-.node .count{font-size:11px;font-weight:600;fill:var(--muted)}
+.node .name{font-size:13px;font-weight:600;fill:var(--ink);font-family:var(--font)}
+.node .role{font-size:11.5px;fill:var(--muted);font-family:var(--font)}
+.node .count{font-size:12px;font-weight:600;fill:var(--accent)}
+.node .tgl:hover .toggle{stroke:var(--path)}
 .node .toggle{fill:var(--surface);stroke:var(--line)}
 .node .toggle-hit{fill:transparent;cursor:pointer}
 .node .toggle-glyph{font-size:12px;font-weight:700;fill:var(--muted);pointer-events:none}
 .hint{position:absolute;left:16px;bottom:14px;font-size:12px;color:var(--muted);background:var(--surface);border:1px solid var(--line);border-radius:7px;padding:6px 10px;box-shadow:var(--shadow)}
+.shown{position:absolute;left:16px;top:14px;font-size:13px;background:var(--surface);border:1px solid var(--line);border-radius:999px;padding:6px 12px;box-shadow:var(--shadow);display:flex;gap:10px;align-items:center}
+.shown strong{font-variant-numeric:tabular-nums}
+.shown button{border:0;background:none;color:var(--accent);font-weight:600;cursor:pointer;padding:0;font-size:13px}
 .zoom{position:absolute;right:16px;bottom:14px;display:flex;flex-direction:column;gap:4px}
 .zoom .btn{width:34px;height:34px;padding:0;font-size:16px}
 
@@ -129,13 +143,13 @@ aside.open{display:flex}
 .meta{font-size:13px;display:grid;grid-template-columns:96px 1fr;gap:6px 10px}
 .meta dt{color:var(--muted)}
 .meta dd{margin:0;overflow-wrap:anywhere}
-.meta a{color:var(--accent)}
+.meta a{color:var(--accent);font-weight:500}
 .chain{display:flex;flex-direction:column;gap:2px}
 .chain button{border:0;background:none;text-align:left;padding:3px 0;cursor:pointer;color:var(--accent);font-size:13px}
 .chain button span{color:var(--muted)}
 .error{color:var(--danger);font-size:12.5px;margin-top:4px;display:none}
 .reports{font-size:13px;color:var(--muted)}
-.tip{position:fixed;pointer-events:none;z-index:40;max-width:300px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 16px rgba(23,32,43,.14);padding:8px 10px;font-size:12.5px;opacity:0;transition:opacity .12s}
+.tip{position:fixed;pointer-events:none;z-index:40;max-width:300px;background:var(--surface);border:1px solid var(--line);border-left:3px solid var(--path);border-radius:8px;box-shadow:0 4px 16px rgba(23,32,43,.14);padding:8px 10px;font-size:12.5px;opacity:0;transition:opacity .12s}
 .tip.show{opacity:1}
 .tip strong{display:block;font-size:13px}
 .tip span{color:var(--muted);display:block}
@@ -152,18 +166,27 @@ aside.open{display:flex}
 .people .who strong{display:block;font-size:13px;font-weight:600}
 .people .who small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .people .n{margin-left:auto;font-size:12px;color:var(--muted);flex:none}
-.more{border:0;background:none;color:var(--accent);cursor:pointer;padding:6px 0 0;font-size:12.5px}
+.more{border:0;background:none;color:var(--accent);font-weight:500;cursor:pointer;padding:6px 0 0;font-size:12.5px}
 .sect h3{font-size:12.5px;font-weight:600;margin:0}
-.known{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:2px 8px;border-radius:5px;background:var(--accent-soft);color:var(--accent);font-weight:600}
-.known::before,.dotkey::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.known{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:2px 8px;border-radius:5px;background:var(--accent-soft);color:var(--ink);font-weight:600}
+.known::before,.dotkey::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--known)}
 .dotkey{display:inline-flex;align-items:center;gap:6px}
 .fine{font-size:12px;color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.show{opacity:1}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
 
+.m-only{display:none!important}
 @media (max-width:760px){
-  .bar{padding:8px 10px;gap:8px}
+  .m-only{display:block!important}
+  .menu-list hr.m-only{display:block!important}
+  .bar{padding:8px 10px;gap:8px;flex-wrap:nowrap;display:grid;grid-template-columns:1fr auto}
+  .bar .title{grid-column:1 / -1}
+  .bar .search{max-width:none}
+  .bar .tools{margin-left:0}
+  .strip{padding:6px 10px}
+  .shown{left:10px;top:10px;font-size:12.5px}
+  .zoom{right:10px;bottom:calc(10px + env(safe-area-inset-bottom,0px))}
   .title span{display:none}
   .tools .btn.opt{display:none}
   .stats{display:none}
@@ -176,8 +199,8 @@ aside.open{display:flex}
 <body>
 <header class="bar">
   <div class="title">
-    <h1>Ingram Micro power map</h1>
-    <span id="subtitle">US organization</span>
+    <h1>Ingram Micro Power Map</h1>
+    <span id="subtitle">Prepared by TADA</span>
   </div>
   <div class="search">
     <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -187,10 +210,14 @@ aside.open{display:flex}
   <div class="tools">
     <button class="btn opt" id="leaders">Leaders only</button>
     <button class="btn opt" id="expand">Expand all</button>
-    <button class="btn" id="collapse">Collapse</button>
+    <button class="btn opt" id="collapse">Collapse</button>
     <div class="menu">
       <button class="btn" id="menuBtn" aria-haspopup="true" aria-expanded="false">More</button>
       <div class="menu-list" id="menu">
+        <button class="m-only" data-act="leaders">Leaders only</button>
+        <button class="m-only" data-act="expand">Show everyone</button>
+        <button class="m-only" data-act="collapse">Collapse</button>
+        <hr class="m-only">
         <button id="exportCsv">Download as CSV</button>
         <button id="theme">Switch light / dark</button>
       </div>
@@ -200,6 +227,7 @@ aside.open{display:flex}
 <div class="strip" id="strip"><span class="label">Show functions</span></div>
 <main>
   <div id="canvas"><svg id="chart" role="img" aria-label="Organization chart"><g id="viewport"></g></svg>
+    <div class="shown" id="shown" aria-live="polite"></div>
     <div class="hint">Hover to trace the reporting line. Click a card for details, ＋ to open a team. Drag to move, scroll to zoom.</div>
     <div class="zoom"><button class="btn" id="zin" aria-label="Zoom in">+</button><button class="btn" id="zout" aria-label="Zoom out">−</button><button class="btn" id="fit" aria-label="Fit chart to screen" title="Fit to screen">⤢</button></div>
   </div>
@@ -258,7 +286,7 @@ function leadersOnly(){
 }
 
 /* ---------- chart ---------- */
-const W = 248, H = 54, GAPX = 300, GAPY = 64;
+const W = 248, H = 54, GAPX = 345, GAPY = 64;
 const svg = d3.select('#chart'), vp = d3.select('#viewport');
 const zoom = d3.zoom().scaleExtent([0.15, 2]).on('zoom', e => vp.attr('transform', e.transform))
   .on('start', () => document.getElementById('canvas').classList.add('dragging'))
@@ -270,7 +298,7 @@ let layout = null;
 function buildTree(id){ const n = { id }; if (!collapsed.has(id) && KIDS[id].length) n.children = KIDS[id].map(buildTree); return n; }
 function trunc(s, n){ return s.length > n ? s.slice(0, n-1) + '…' : s; }
 
-let prevPos = {};
+let prevPos = {}, shown = 0;
 const tip = document.createElement('div'); tip.className = 'tip'; tip.setAttribute('aria-hidden','true'); document.body.appendChild(tip);
 const linkPath = d3.linkHorizontal().x(d => d.y).y(d => d.x);
 function linkD(s, t){ return linkPath({source:{x:s.x, y:s.y + W}, target:{x:t.x, y:t.y}}); }
@@ -303,9 +331,9 @@ function render(origin){
   lift.append('rect').attr('class','bar').attr('width',4).attr('height',H-12).attr('x',6).attr('y',-H/2+6).attr('rx',2);
   lift.append('text').attr('class','name').attr('x',18).attr('y',-4);
   lift.append('text').attr('class','role').attr('x',18).attr('y',13);
-  lift.append('circle').attr('class','status').attr('r',4.5).attr('cx',W-14).attr('cy',-H/2+13).attr('fill','var(--accent)');
+  lift.append('circle').attr('class','status').attr('r',4.5).attr('cx',W-14).attr('cy',-H/2+13).attr('fill','var(--known)');
   const tg = enter.append('g').attr('class','tgl');
-  tg.append('rect').attr('class','toggle-hit').attr('x',W-2).attr('y',-14).attr('width',48).attr('height',28);
+  tg.append('rect').attr('class','toggle-hit').attr('x',W-2).attr('y',-14).attr('width',96).attr('height',28);
   tg.append('circle').attr('class','toggle').attr('cx',W+12).attr('r',10);
   tg.append('text').attr('class','toggle-glyph').attr('x',W+12).attr('y',4).attr('text-anchor','middle');
   tg.append('text').attr('class','count').attr('x',W+27).attr('y',4);
@@ -323,7 +351,7 @@ function render(origin){
   all.select('.tgl').style('display', d => KIDS[d.data.id].length ? null : 'none')
     .attr('aria-label', d => (collapsed.has(d.data.id) ? 'Open ' : 'Close ') + byId[d.data.id].name + '’s team');
   all.select('.toggle-glyph').text(d => collapsed.has(d.data.id) ? '+' : '–');
-  all.select('.count').text(d => collapsed.has(d.data.id) ? descendants(d.data.id).length : '');
+  all.select('.count').text(d => { if (!collapsed.has(d.data.id)) return ''; const n = descendants(d.data.id).length; return n + (n === 1 ? ' person' : ' people'); });
 
   all.on('click', (e, d) => { e.stopPropagation(); select(d.data.id); })
      .on('dblclick', (e, d) => { e.stopPropagation(); if (KIDS[d.data.id].length) toggle(d.data.id); })
@@ -337,6 +365,7 @@ function render(origin){
   all.select('.tgl').on('click', (e, d) => { e.stopPropagation(); toggle(d.data.id); })
      .on('mouseenter', e => e.stopPropagation());
   prevPos = pos;
+  shown = root.descendants().length; updateShown();
 }
 function hover(id, e){
   const chain = id ? new Set([id, ...ancestors(id)]) : new Set();
@@ -475,9 +504,15 @@ FUNCS.forEach(([f, v]) => {
 });
 function syncChips(){ strip.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', activeFns.has(c.dataset.f))); }
 const stats = document.createElement('div'); stats.className = 'stats'; strip.appendChild(stats);
+function updateShown(){
+  const el = document.getElementById('shown'); if (!el) return;
+  const all = shown === PEOPLE.length;
+  el.innerHTML = `<span>Showing <strong>${shown}</strong> of <strong>${PEOPLE.length}</strong> people</span>` + (all ? '' : '<button id="showAll">Show everyone</button>');
+  const b = document.getElementById('showAll'); if (b) b.onclick = () => { collapsed.clear(); render(); fit(); };
+}
 function updateStats(){
   const leaders = PEOPLE.filter(p => LEVELS.indexOf(p.level) <= 3).length;
-  stats.innerHTML = `<span><strong>${PEOPLE.length}</strong> people</span><span><strong>${leaders}</strong> Director and above</span><span class="dotkey">Already talking to</span>`;
+  stats.innerHTML = `<span><strong>${leaders}</strong> Director and above</span><span class="dotkey">Already talking to</span>`;
 }
 
 /* ---------- toolbar ---------- */
@@ -487,6 +522,8 @@ document.getElementById('leaders').onclick = () => { leadersOnly(); render(); fi
 document.getElementById('expand').onclick = () => { collapsed.clear(); render(); fit(); };
 document.getElementById('collapse').onclick = () => { setDefaultCollapse(); render(); fit(); };
 document.getElementById('fit').onclick = fit;
+document.querySelectorAll('[data-act]').forEach(b => b.onclick = () => { menu.classList.remove('open'); document.getElementById(b.dataset.act).click(); });
+if (matchMedia('(hover: none)').matches) q.placeholder = 'Find a person or title';
 document.getElementById('zin').onclick = () => svg.transition().duration(reduce?0:200).call(zoom.scaleBy, 1.25);
 document.getElementById('zout').onclick = () => svg.transition().duration(reduce?0:200).call(zoom.scaleBy, 0.8);
 svg.on('click', () => { if (selected){ selected = null; renderPanel(); render(); } });
