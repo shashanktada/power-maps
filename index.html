@@ -82,17 +82,20 @@ main{flex:1;display:flex;min-height:0;position:relative}
 #canvas.dragging{cursor:grabbing}
 svg#chart{width:100%;height:100%;display:block}
 .link{fill:none;stroke:var(--line);stroke-width:1.4}
-.link.inferred{stroke-dasharray:4 4}
-.link.path{stroke:var(--accent);stroke-width:2.4;stroke-dasharray:none}
+.link.path{stroke:var(--accent);stroke-width:2.4}
+.link.hover{stroke:var(--accent);stroke-width:2;opacity:.75}
+.node .card{transition:stroke .15s}
+.node.hover .card{stroke:var(--accent)}
+.node .lift{transition:transform .15s}
+.node.hover .lift{transform:translateY(-1px)}
 .node{cursor:pointer}
 .node .card{fill:var(--surface);stroke:var(--line);stroke-width:1}
 .node:hover .card{stroke:var(--muted)}
-.node.selected .card{stroke:var(--accent);stroke-width:2}
+.node.selected .card,.node.selected:hover .card{stroke:var(--accent);stroke-width:2;fill:var(--accent-soft)}
 .node.onpath .card{stroke:var(--accent)}
 .node.dim{opacity:.22}
 .node .name{font-size:13px;font-weight:600;fill:var(--ink)}
 .node .role{font-size:11.5px;fill:var(--muted)}
-.node .badge{font-size:10.5px;font-weight:700}
 .node .count{font-size:11px;font-weight:600;fill:var(--muted)}
 .node .toggle{fill:var(--surface);stroke:var(--line)}
 .node .toggle-hit{fill:transparent;cursor:pointer}
@@ -132,6 +135,29 @@ aside.open{display:flex}
 .chain button span{color:var(--muted)}
 .error{color:var(--danger);font-size:12.5px;margin-top:4px;display:none}
 .reports{font-size:13px;color:var(--muted)}
+.tip{position:fixed;pointer-events:none;z-index:40;max-width:300px;background:var(--surface);border:1px solid var(--line);border-radius:8px;box-shadow:0 4px 16px rgba(23,32,43,.14);padding:8px 10px;font-size:12.5px;opacity:0;transition:opacity .12s}
+.tip.show{opacity:1}
+.tip strong{display:block;font-size:13px}
+.tip span{color:var(--muted);display:block}
+.mix{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--surface-2);margin:8px 0 6px}
+.mix i{display:block;height:100%}
+.mix-legend{display:flex;flex-wrap:wrap;gap:4px 12px;font-size:12px;color:var(--muted)}
+.mix-legend b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:0}
+.people{display:flex;flex-direction:column;margin-top:8px;border:1px solid var(--line-soft);border-radius:8px;overflow:hidden}
+.people button{display:flex;gap:10px;align-items:center;text-align:left;border:0;border-top:1px solid var(--line-soft);background:var(--surface);padding:7px 10px;cursor:pointer}
+.people button:first-child{border-top:0}
+.people button:hover{background:var(--surface-2)}
+.people .sw{width:4px;align-self:stretch;border-radius:2px;flex:none}
+.people .who{min-width:0}
+.people .who strong{display:block;font-size:13px;font-weight:600}
+.people .who small{display:block;color:var(--muted);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.people .n{margin-left:auto;font-size:12px;color:var(--muted);flex:none}
+.more{border:0;background:none;color:var(--accent);cursor:pointer;padding:6px 0 0;font-size:12.5px}
+.sect h3{font-size:12.5px;font-weight:600;margin:0}
+.known{display:inline-flex;align-items:center;gap:6px;font-size:12px;padding:2px 8px;border-radius:5px;background:var(--accent-soft);color:var(--accent);font-weight:600}
+.known::before,.dotkey::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--accent)}
+.dotkey{display:inline-flex;align-items:center;gap:6px}
+.fine{font-size:12px;color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:8px 14px;border-radius:8px;font-size:13px;opacity:0;pointer-events:none;transition:opacity .2s}
 .toast.show{opacity:1}
 .sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
@@ -166,20 +192,15 @@ aside.open{display:flex}
       <button class="btn" id="menuBtn" aria-haspopup="true" aria-expanded="false">More</button>
       <div class="menu-list" id="menu">
         <button id="exportCsv">Download as CSV</button>
-        <button id="exportJson">Save my changes to a file</button>
-        <button id="importJson">Load changes from a file</button>
-        <hr>
         <button id="theme">Switch light / dark</button>
-        <button id="reset">Discard all my changes</button>
       </div>
     </div>
   </div>
-  <input type="file" id="file" accept="application/json" hidden>
 </header>
 <div class="strip" id="strip"><span class="label">Show functions</span></div>
 <main>
   <div id="canvas"><svg id="chart" role="img" aria-label="Organization chart"><g id="viewport"></g></svg>
-    <div class="hint">Click a card for details. Click ＋ to open a team. Drag to move, scroll to zoom.</div>
+    <div class="hint">Hover to trace the reporting line. Click a card for details, ＋ to open a team. Drag to move, scroll to zoom.</div>
     <div class="zoom"><button class="btn" id="zin" aria-label="Zoom in">+</button><button class="btn" id="zout" aria-label="Zoom out">−</button><button class="btn" id="fit" aria-label="Fit chart to screen" title="Fit to screen">⤢</button></div>
   </div>
   <aside id="panel" aria-label="Person details"></aside>
@@ -195,10 +216,6 @@ const FUNCS = [
   ['Operations','--f-ops'],['Logistics/Distribution','--f-log'],['Technology','--f-tech'],['Sales/Go-to-Market','--f-sales'],['Legal','--f-legal']];
 const FCOLOR = Object.fromEntries(FUNCS);
 const LEVELS = ['C-Suite','EVP/SVP','VP','Director','Manager','Individual Contributor'];
-const ROLES = ['Decision maker','Budget owner','Champion','Influencer','Blocker','End user'];
-const ROLE_SHORT = {'Decision maker':'DM','Budget owner':'BO','Champion':'CH','Influencer':'IN','Blocker':'BL','End user':'EU'};
-const STATUSES = ['Not contacted','Contacted','Engaged','Meeting held'];
-const STATUS_COLOR = {'Not contacted':null,'Contacted':'#C9A227','Engaged':'var(--accent)','Meeting held':'var(--accent)'};
 
 /* ---------- state ---------- */
 let edits = {};
@@ -234,7 +251,7 @@ function depthOf(id){ return ancestors(id).length; }
 function setDefaultCollapse(){
   collapsed = new Set(PEOPLE.filter(p => KIDS[p.id].length && depthOf(p.id) >= 2).map(p => p.id));
   // open the path to people you're already talking to
-  PEOPLE.forEach(p => { if (['Engaged','Meeting held','Contacted'].includes(get(p.id,'status'))) ancestors(p.id).forEach(a => collapsed.delete(a)); });
+  PEOPLE.forEach(p => { if (p.status) ancestors(p.id).forEach(a => collapsed.delete(a)); });
 }
 function leadersOnly(){
   collapsed = new Set(PEOPLE.filter(p => KIDS[p.id].length && (LEVELS.indexOf(p.level) >= 3 || KIDS[p.id].every(k => LEVELS.indexOf(byId[k].level) >= 4))).map(p => p.id));
@@ -253,56 +270,92 @@ let layout = null;
 function buildTree(id){ const n = { id }; if (!collapsed.has(id) && KIDS[id].length) n.children = KIDS[id].map(buildTree); return n; }
 function trunc(s, n){ return s.length > n ? s.slice(0, n-1) + '…' : s; }
 
-function render(){
+let prevPos = {};
+const tip = document.createElement('div'); tip.className = 'tip'; tip.setAttribute('aria-hidden','true'); document.body.appendChild(tip);
+const linkPath = d3.linkHorizontal().x(d => d.y).y(d => d.x);
+function linkD(s, t){ return linkPath({source:{x:s.x, y:s.y + W}, target:{x:t.x, y:t.y}}); }
+
+function render(origin){
   KIDS = childrenMap();
   const root = d3.hierarchy(buildTree(ROOT_ID));
   d3.tree().nodeSize([GAPY, GAPX]).separation((a,b) => a.parent === b.parent ? 1 : 1.15)(root);
   layout = root;
+  const pos = {}; root.each(d => pos[d.data.id] = {x:d.x, y:d.y});
   const pathSet = new Set(selected ? [selected, ...ancestors(selected)] : []);
+  const dur = reduce ? 0 : 320;
+  // where new nodes grow from, and where removed nodes shrink to
+  const from = id => { if (prevPos[id]) return prevPos[id]; let a = parentOf(id); while (a && !prevPos[a]) a = parentOf(a); return (origin && prevPos[origin]) || (a && prevPos[a]) || pos[id]; };
+  const to = id => { let a = parentOf(id); while (a && !pos[a]) a = parentOf(a); return (a && pos[a]) || prevPos[id]; };
 
   const links = vp.selectAll('path.link').data(root.links(), d => d.target.data.id);
-  links.exit().remove();
-  links.enter().append('path').attr('class','link').merge(links)
-    .attr('class', d => 'link' + (get(d.target.data.id,'confirmed') ? '' : ' inferred') + (pathSet.has(d.target.data.id) ? ' path' : ''))
-    .attr('d', d3.linkHorizontal().x(d => d.y).y(d => d.x).source(d => ({x:d.source.x, y:d.source.y + W})).target(d => ({x:d.target.x, y:d.target.y})));
-  vp.selectAll('path.link.path').raise();
+  links.exit().transition().duration(dur).attr('d', d => { const p = to(d.target.data.id); return linkD(p, p); }).remove();
+  const lEnter = links.enter().insert('path', 'g').attr('class','link').attr('d', d => { const p = from(d.target.data.id); return linkD(p, {x:p.x, y:p.y + W}); });
+  lEnter.merge(links)
+    .attr('class', d => 'link' + (pathSet.has(d.target.data.id) ? ' path' : ''))
+    .transition().duration(dur).attr('d', d => linkD(d.source, d.target));
 
   const nodes = vp.selectAll('g.node').data(root.descendants(), d => d.data.id);
-  nodes.exit().remove();
-  const enter = nodes.enter().append('g').attr('class','node').attr('tabindex',0).attr('role','button');
-  enter.append('rect').attr('class','card').attr('width',W).attr('height',H).attr('y',-H/2).attr('rx',7);
-  enter.append('rect').attr('class','bar').attr('width',4).attr('height',H-12).attr('x',6).attr('y',-H/2+6).attr('rx',2);
-  enter.append('text').attr('class','name').attr('x',18).attr('y',-4);
-  enter.append('text').attr('class','role').attr('x',18).attr('y',13);
-  enter.append('circle').attr('class','status').attr('r',4.5).attr('cx',W-14).attr('cy',-H/2+13);
-  enter.append('text').attr('class','badge').attr('text-anchor','end').attr('x',W-10).attr('y',H/2-9);
+  nodes.exit().transition().duration(dur).style('opacity', 0).attr('transform', d => { const p = to(d.data.id); return `translate(${p.y},${p.x})`; }).remove();
+  const enter = nodes.enter().append('g').attr('class','node').attr('tabindex',0).attr('role','button')
+    .attr('transform', d => { const p = from(d.data.id); return `translate(${p.y},${p.x})`; }).style('opacity', 0);
+  const lift = enter.append('g').attr('class','lift');
+  lift.append('rect').attr('class','card').attr('width',W).attr('height',H).attr('y',-H/2).attr('rx',7);
+  lift.append('rect').attr('class','bar').attr('width',4).attr('height',H-12).attr('x',6).attr('y',-H/2+6).attr('rx',2);
+  lift.append('text').attr('class','name').attr('x',18).attr('y',-4);
+  lift.append('text').attr('class','role').attr('x',18).attr('y',13);
+  lift.append('circle').attr('class','status').attr('r',4.5).attr('cx',W-14).attr('cy',-H/2+13).attr('fill','var(--accent)');
   const tg = enter.append('g').attr('class','tgl');
-  tg.append('rect').attr('class','toggle-hit').attr('x',W-2).attr('y',-14).attr('width',44).attr('height',28);
+  tg.append('rect').attr('class','toggle-hit').attr('x',W-2).attr('y',-14).attr('width',48).attr('height',28);
   tg.append('circle').attr('class','toggle').attr('cx',W+12).attr('r',10);
   tg.append('text').attr('class','toggle-glyph').attr('x',W+12).attr('y',4).attr('text-anchor','middle');
   tg.append('text').attr('class','count').attr('x',W+27).attr('y',4);
 
   const all = enter.merge(nodes);
-  all.attr('transform', d => `translate(${d.y},${d.x})`)
-    .classed('selected', d => d.data.id === selected)
+  all.classed('selected', d => d.data.id === selected)
     .classed('onpath', d => pathSet.has(d.data.id) && d.data.id !== selected)
     .classed('dim', d => !activeFns.has(byId[d.data.id].fn))
-    .attr('aria-label', d => `${byId[d.data.id].name}, ${byId[d.data.id].title}`);
+    .attr('aria-label', d => `${byId[d.data.id].name}, ${byId[d.data.id].title}`)
+    .transition().duration(dur).style('opacity', null).attr('transform', d => `translate(${d.y},${d.x})`);
   all.select('.bar').attr('fill', d => `var(${FCOLOR[byId[d.data.id].fn] || '--f-sales'})`);
   all.select('.name').text(d => trunc(byId[d.data.id].name, 28));
   all.select('.role').text(d => trunc(byId[d.data.id].title, 36));
-  all.select('.status').attr('fill', d => STATUS_COLOR[get(d.data.id,'status') || 'Not contacted'] || 'transparent')
-    .attr('stroke', d => STATUS_COLOR[get(d.data.id,'status') || 'Not contacted'] ? 'none' : 'transparent');
-  all.select('.badge').text(d => ROLE_SHORT[get(d.data.id,'role')] || '').attr('fill','var(--accent)');
-  all.select('.tgl').style('display', d => KIDS[d.data.id].length ? null : 'none');
+  all.select('.status').style('display', d => byId[d.data.id].status ? null : 'none');
+  all.select('.tgl').style('display', d => KIDS[d.data.id].length ? null : 'none')
+    .attr('aria-label', d => (collapsed.has(d.data.id) ? 'Open ' : 'Close ') + byId[d.data.id].name + '’s team');
   all.select('.toggle-glyph').text(d => collapsed.has(d.data.id) ? '+' : '–');
   all.select('.count').text(d => collapsed.has(d.data.id) ? descendants(d.data.id).length : '');
 
   all.on('click', (e, d) => { e.stopPropagation(); select(d.data.id); })
-     .on('keydown', (e, d) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(d.data.id); } });
-  all.select('.tgl').on('click', (e, d) => { e.stopPropagation(); toggle(d.data.id); });
+     .on('dblclick', (e, d) => { e.stopPropagation(); if (KIDS[d.data.id].length) toggle(d.data.id); })
+     .on('keydown', (e, d) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); select(d.data.id); }
+        if ((e.key === 'ArrowRight' && collapsed.has(d.data.id)) || (e.key === 'ArrowLeft' && !collapsed.has(d.data.id) && KIDS[d.data.id].length)) { e.preventDefault(); toggle(d.data.id); }
+     })
+     .on('mouseenter', (e, d) => hover(d.data.id, e))
+     .on('mousemove', e => placeTip(e))
+     .on('mouseleave', () => hover(null));
+  all.select('.tgl').on('click', (e, d) => { e.stopPropagation(); toggle(d.data.id); })
+     .on('mouseenter', e => e.stopPropagation());
+  prevPos = pos;
 }
-function toggle(id){ collapsed.has(id) ? collapsed.delete(id) : collapsed.add(id); render(); }
+function hover(id, e){
+  const chain = id ? new Set([id, ...ancestors(id)]) : new Set();
+  vp.selectAll('g.node').classed('hover', d => chain.has(d.data.id));
+  vp.selectAll('path.link').classed('hover', d => chain.has(d.target.data.id));
+  vp.selectAll('path.link.hover').raise();
+  if (!id || window.matchMedia('(hover: none)').matches){ tip.classList.remove('show'); return; }
+  const p = byId[id], n = descendants(id).length, par = parentOf(id);
+  tip.innerHTML = `<strong>${esc(p.name)}</strong><span>${esc(p.title)}</span><span>${esc(p.city || '')}</span>${par ? `<span>Reports to ${esc(byId[par].name)}</span>` : ''}${n ? `<span>${n} ${n>1?'people':'person'} in their team</span>` : ''}`;
+  tip.classList.add('show'); placeTip(e);
+}
+function placeTip(e){
+  if (!e) return; const r = tip.getBoundingClientRect();
+  let x = e.clientX + 16, y = e.clientY + 14;
+  if (x + r.width > innerWidth - 8) x = e.clientX - r.width - 16;
+  if (y + r.height > innerHeight - 8) y = e.clientY - r.height - 14;
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function toggle(id){ collapsed.has(id) ? collapsed.delete(id) : collapsed.add(id); render(id); }
 function nodePos(id){ let f = null; layout.each(d => { if (d.data.id === id) f = d; }); return f; }
 function centerOn(id, k){
   const d = nodePos(id); if (!d) return;
@@ -334,66 +387,52 @@ function select(id, center){
 function esc(s){ return String(s ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
 function basisText(p){
   if (!p.parent) return 'Top of the chart.';
-  if (/^Breeze/.test(p.basis)) return 'Not confirmed. Placed by HubSpot Breeze from job titles, then adjusted.';
-  return 'Not confirmed. Placed by job title (' + p.basis.charAt(0).toLowerCase() + p.basis.slice(1) + ').';
+  if (/^Breeze/.test(p.basis)) return 'Reporting line suggested by HubSpot Breeze from job titles, then adjusted. Not confirmed.';
+  return 'Reporting line inferred from job title and location (' + p.basis.charAt(0).toLowerCase() + p.basis.slice(1) + '). Not confirmed.';
 }
 function renderPanel(){
   if (!selected){ panel.classList.remove('open'); panel.innerHTML=''; return; }
-  const p = byId[selected], id = selected;
-  const par = parentOf(id), role = get(id,'role') || '', status = get(id,'status') || 'Not contacted';
-  const chain = ancestors(id).reverse();
-  const reports = KIDS[id].length, all = descendants(id).length;
+  const p = byId[selected], id = selected, par = parentOf(id);
+  const chain = ancestors(id).reverse(), kids = KIDS[id], all = descendants(id);
+  const mix = {}; all.forEach(x => mix[byId[x].fn] = (mix[byId[x].fn]||0) + 1);
+  const mixArr = FUNCS.filter(f => mix[f[0]]).map(f => [f[0], f[1], mix[f[0]]]);
+  const known = byId[id].status;
+  const SHOW = 8;
+  const row = x => `<button data-go="${x}"><span class="sw" style="background:var(${FCOLOR[byId[x].fn]||'--f-sales'})"></span><span class="who"><strong>${esc(byId[x].name)}</strong><small>${esc(byId[x].title)}</small></span>${KIDS[x].length ? `<span class="n">${descendants(x).length}</span>` : ''}</button>`;
   panel.innerHTML = `
     <div class="p-head">
       <button class="p-close" id="pclose" aria-label="Close details">×</button>
       <h2>${esc(p.name)}</h2>
       <p>${esc(p.title)}</p>
-      <div class="tags"><span class="tag" style="border-left:3px solid var(${FCOLOR[p.fn]||'--f-sales'})">${esc(p.fn)}</span><span class="tag">${esc(p.level)}</span></div>
+      <div class="tags"><span class="tag" style="border-left:3px solid var(${FCOLOR[p.fn]||'--f-sales'})">${esc(p.fn)}</span><span class="tag">${esc(p.level)}</span>${known ? `<span class="known">${esc(known)}</span>` : ''}</div>
     </div>
     <div class="p-body">
-      <div class="field"><label>Relationship</label>
-        <div class="seg" id="status">${STATUSES.map(s => `<button aria-pressed="${s===status}" data-v="${esc(s)}">${esc(s)}</button>`).join('')}</div></div>
-      <div class="field"><label>Buying role</label>
-        <div class="seg" id="role">${ROLES.map(r => `<button aria-pressed="${r===role}" data-v="${esc(r)}">${esc(r)}</button>`).join('')}</div>
-        <div class="help">Click again to clear.</div></div>
-      <div class="field"><label for="mgr">Reports to</label>
-        <input type="text" id="mgr" list="names" value="${par ? esc(byId[par].name) : ''}" ${par ? '' : 'disabled'} placeholder="Type a name">
-        <div class="error" id="mgrErr"></div>
-        <label class="check" style="margin-top:8px;font-weight:400"><input type="checkbox" id="conf" ${get(id,'confirmed') ? 'checked' : ''} ${par ? '' : 'disabled'}> Reporting line confirmed</label>
-        <div class="help">${esc(get(id,'confirmed') ? 'Confirmed by the team.' : basisText(p))}</div></div>
-      <div class="field"><label for="note">Notes</label><textarea id="note" placeholder="What we know about this person">${esc(get(id,'note') || '')}</textarea></div>
-      <div class="field"><label>Reporting chain</label>
-        <div class="chain">${chain.length ? chain.map(a => `<button data-go="${a}">${esc(byId[a].name)} <span>${esc(trunc(byId[a].title, 40))}</span></button>`).join('') : '<span class="reports">Top of the chart</span>'}</div>
-        <div class="reports" style="margin-top:6px">${reports ? `${reports} direct report${reports>1?'s':''}, ${all} in total` : 'No reports on the chart'}</div></div>
       <dl class="meta">
+        <dt>Reports to</dt><dd>${par ? `<a href="#" data-go="${par}">${esc(byId[par].name)}</a>` : 'Top of the chart'}</dd>
         <dt>Location</dt><dd>${esc(p.city || 'Not listed')}</dd>
         <dt>LinkedIn</dt><dd>${p.li ? `<a href="${esc(p.li)}" target="_blank" rel="noopener">Open profile</a>` : 'Not listed'}</dd>
       </dl>
+      ${kids.length ? `<div class="sect"><h3>Team</h3>
+        <div class="fine" style="margin-top:2px">${kids.length} direct report${kids.length>1?'s':''}, ${all.length} people in total</div>
+        <div class="mix" aria-hidden="true">${mixArr.map(m => `<i style="width:${m[2]/all.length*100}%;background:var(${m[1]})" title="${esc(m[0])}: ${m[2]}"></i>`).join('')}</div>
+        <div class="mix-legend">${mixArr.map(m => `<span><b style="background:var(${m[1]})"></b>${esc(m[0])} ${m[2]}</span>`).join('')}</div>
+        <div class="people" id="kids">${kids.slice(0, SHOW).map(row).join('')}</div>
+        ${kids.length > SHOW ? `<button class="more" id="moreKids">Show all ${kids.length} direct reports</button>` : ''}
+      </div>` : ''}
+      ${chain.length ? `<div class="sect"><h3>Reporting chain</h3>
+        <div class="people">${chain.map(row).join('')}</div>
+        <p class="fine" style="margin:8px 0 0">${esc(basisText(p))}</p></div>` : ''}
+      <div class="field"><label for="note">Notes</label><textarea id="note" placeholder="Anything worth remembering about ${esc(p.name.split(' ')[0])}">${esc(get(id,'note') || '')}</textarea>
+        <div class="help">Saved in this browser only.</div></div>
     </div>`;
   panel.classList.add('open');
   document.getElementById('pclose').onclick = () => { selected = null; renderPanel(); render(); };
-  panel.querySelectorAll('#status button').forEach(b => b.onclick = () => { setEdit(id,'status', b.dataset.v === 'Not contacted' ? '' : b.dataset.v); renderPanel(); render(); });
-  panel.querySelectorAll('#role button').forEach(b => b.onclick = () => { setEdit(id,'role', role === b.dataset.v ? '' : b.dataset.v); renderPanel(); render(); });
-  panel.querySelectorAll('[data-go]').forEach(b => b.onclick = () => select(b.dataset.go, true));
+  const wire = () => panel.querySelectorAll('[data-go]').forEach(b => b.onclick = e => { e.preventDefault(); select(b.dataset.go, true); });
+  wire();
+  const mk = document.getElementById('moreKids');
+  if (mk) mk.onclick = () => { document.getElementById('kids').innerHTML = kids.map(row).join(''); mk.remove(); wire(); };
   const note = document.getElementById('note'); let t; note.oninput = () => { clearTimeout(t); t = setTimeout(() => setEdit(id,'note', note.value), 300); };
-  const conf = document.getElementById('conf'); conf.onchange = () => { setEdit(id,'confirmed', conf.checked); renderPanel(); render(); };
-  const mgr = document.getElementById('mgr'), err = document.getElementById('mgrErr');
-  mgr.onchange = () => {
-    const matches = PEOPLE.filter(x => x.name.toLowerCase() === mgr.value.trim().toLowerCase());
-    err.style.display = 'none';
-    if (!matches.length){ err.textContent = 'No one on the chart has that name. Pick a name from the list.'; err.style.display = 'block'; return; }
-    const target = matches.length > 1 ? (matches.find(x => x.id === par) || matches[0]) : matches[0];
-    if (target.id === id || descendants(id).includes(target.id)){ err.textContent = `${target.name} reports to ${p.name}, so they can’t be their manager.`; err.style.display = 'block'; return; }
-    setEdit(id,'parent', target.id); setEdit(id,'confirmed', true);
-    KIDS = childrenMap(); ancestors(id).forEach(a => collapsed.delete(a));
-    render(); renderPanel(); centerOn(id); toast(`${p.name} now reports to ${target.name}`);
-  };
 }
-// datalist of names
-const dl = document.createElement('datalist'); dl.id = 'names';
-dl.innerHTML = PEOPLE.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(p => `<option value="${esc(p.name)}">${esc(p.title)}</option>`).join('');
-document.body.appendChild(dl);
-
 /* ---------- search ---------- */
 const q = document.getElementById('q'), res = document.getElementById('results');
 let hits = [], hi = 0;
@@ -437,11 +476,8 @@ FUNCS.forEach(([f, v]) => {
 function syncChips(){ strip.querySelectorAll('.chip').forEach(c => c.setAttribute('aria-pressed', activeFns.has(c.dataset.f))); }
 const stats = document.createElement('div'); stats.className = 'stats'; strip.appendChild(stats);
 function updateStats(){
-  const engaged = PEOPLE.filter(p => ['Engaged','Meeting held'].includes(get(p.id,'status'))).length;
-  const contacted = PEOPLE.filter(p => get(p.id,'status') === 'Contacted').length;
-  const roles = PEOPLE.filter(p => get(p.id,'role')).length;
-  const conf = PEOPLE.filter(p => get(p.id,'confirmed')).length;
-  stats.innerHTML = `<span><strong>${PEOPLE.length}</strong> people</span><span><strong>${engaged}</strong> engaged</span><span><strong>${contacted}</strong> contacted</span><span><strong>${roles}</strong> with a buying role</span><span><strong>${conf}</strong> lines confirmed</span>`;
+  const leaders = PEOPLE.filter(p => LEVELS.indexOf(p.level) <= 3).length;
+  stats.innerHTML = `<span><strong>${PEOPLE.length}</strong> people</span><span><strong>${leaders}</strong> Director and above</span><span class="dotkey">Already talking to</span>`;
 }
 
 /* ---------- toolbar ---------- */
@@ -458,25 +494,9 @@ svg.on('click', () => { if (selected){ selected = null; renderPanel(); render();
 function download(name, text, type){ const a = document.createElement('a'); a.href = URL.createObjectURL(new Blob([text], {type})); a.download = name; document.body.appendChild(a); a.click(); a.remove(); }
 function csvCell(v){ v = String(v ?? ''); return /[",\n]/.test(v) ? '"' + v.replace(/"/g,'""') + '"' : v; }
 document.getElementById('exportCsv').onclick = () => {
-  const rows = [['Name','Job title','Function','Seniority','Reports to','Reporting line','Relationship','Buying role','Notes','Location','LinkedIn']];
-  PEOPLE.forEach(p => { const par = parentOf(p.id); rows.push([p.name,p.title,p.fn,p.level,par?byId[par].name:'',get(p.id,'confirmed')?'Confirmed':'Inferred',get(p.id,'status')||'Not contacted',get(p.id,'role')||'',get(p.id,'note')||'',p.city,p.li]); });
+  const rows = [['Name','Job title','Function','Seniority','Reports to','Location','LinkedIn','Notes']];
+  PEOPLE.forEach(p => { const par = parentOf(p.id); rows.push([p.name,p.title,p.fn,p.level,par?byId[par].name:'',p.city,p.li,get(p.id,'note')||'']); });
   download('ingram-micro-power-map.csv', rows.map(r => r.map(csvCell).join(',')).join('\n'), 'text/csv'); menu.classList.remove('open');
-};
-document.getElementById('exportJson').onclick = () => { download('ingram-micro-changes.json', JSON.stringify({account:'ingram-micro', saved:new Date().toISOString(), edits}, null, 2), 'application/json'); menu.classList.remove('open'); toast('Changes saved to a file'); };
-const file = document.getElementById('file');
-document.getElementById('importJson').onclick = () => { file.click(); menu.classList.remove('open'); };
-file.onchange = async () => {
-  try {
-    const data = JSON.parse(await file.files[0].text());
-    if (!data || data.account !== 'ingram-micro' || typeof data.edits !== 'object') throw new Error();
-    edits = data.edits; save(); KIDS = childrenMap(); setDefaultCollapse(); render(); renderPanel(); toast('Changes loaded');
-  } catch(e) { toast('That file isn’t a saved changes file from this map'); }
-  file.value = '';
-};
-document.getElementById('reset').onclick = () => {
-  menu.classList.remove('open');
-  if (!confirm('Discard all roles, relationships, notes and reporting changes made in this browser?')) return;
-  edits = {}; save(); selected = null; KIDS = childrenMap(); setDefaultCollapse(); render(); renderPanel(); fit(); toast('All changes discarded');
 };
 document.getElementById('theme').onclick = () => {
   const r = document.documentElement, dark = r.dataset.theme ? r.dataset.theme === 'dark' : matchMedia('(prefers-color-scheme: dark)').matches;
@@ -488,7 +508,7 @@ let toastT; function toast(m){ const t = document.getElementById('toast'); t.tex
 
 /* ---------- start ---------- */
 // seed relationship data as defaults
-PEOPLE.forEach(p => { p.status = p.status || ''; p.role = p.role || ''; p.note = p.note || ''; p.confirmed = false; });
+PEOPLE.forEach(p => { p.status = p.status || ''; p.note = p.note || ''; });
 setDefaultCollapse(); render(); updateStats();
 requestAnimationFrame(() => {
   const c = document.getElementById('canvas').getBoundingClientRect(), k = c.width < 760 ? 0.6 : 0.75;
